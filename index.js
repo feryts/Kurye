@@ -64,11 +64,6 @@ async function gonderiGetir(gonderiNo) {
 
   const r3 = await axios.post(API_BASE + "/GetShipmentById", { ShipmentId: shipmentId }, { headers });
   const detay = r3.data?.Payload;
-  const gsm = detay?.Recipient?.Gsm || "";
-  let telefon = "";
-  if (gsm.startsWith("5") && gsm.length === 10) telefon = "0" + gsm;
-  else if (gsm.startsWith("05") && gsm.length === 11) telefon = gsm;
-
   const adresText = detay?.Recipient?.Address?.AddressText || "";
   const ilce = detay?.Recipient?.Address?.TownName || "";
   const il = detay?.Recipient?.Address?.CityName || "";
@@ -84,7 +79,7 @@ async function gonderiGetir(gonderiNo) {
     if (adresEvent) adresDegisiklik = adresEvent.Description;
   } catch (e) { console.log("Events alinamadi:", e.message); }
 
-  return { adSoyad, telefon, adres, adresDegisiklik, shipmentItemId };
+  return { adSoyad, adres, adresDegisiklik, shipmentItemId };
 }
 
 const cache = {};
@@ -109,7 +104,7 @@ app.post("/sorgula", async (req, res) => {
   }
   try {
     const bilgi = await gonderiGetir(key);
-    if (!bilgi.adSoyad && !bilgi.telefon) return res.json({ hata: "Bilgi bulunamadi" });
+    if (!bilgi.adSoyad && !bilgi.adres) return res.json({ hata: "Bilgi bulunamadi" });
     cache[key] = { data: bilgi, zaman: Date.now() };
     res.json(bilgi);
   } catch (e) {
